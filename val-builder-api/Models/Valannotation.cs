@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace val_builder_api.Models;
 
-[Keyless]
 [Table("VALAnnotations")]
 public partial class Valannotation
 {
+    [Key]
     [Column("AnnotationID")]
     public int AnnotationId { get; set; }
 

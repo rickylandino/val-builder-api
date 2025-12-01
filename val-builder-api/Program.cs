@@ -5,7 +5,7 @@ using val_builder_api.Services;
 using val_builder_api.Services.Impl;
 
 [ExcludeFromCodeCoverage]
-public class Program
+public partial class Program
 {
     public static void Main(string[] args)
     {
@@ -25,6 +25,7 @@ public class Program
         builder.Services.AddScoped<IValDetailService, ValDetailService>();
         builder.Services.AddScoped<IValPdfService, ValPdfService>();
         builder.Services.AddScoped<IValPdfAttachmentService, ValPdfAttachmentService>();
+        builder.Services.AddScoped<IValAnnotationService, ValAnnotationService>();
 
         builder.Services.AddControllers();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

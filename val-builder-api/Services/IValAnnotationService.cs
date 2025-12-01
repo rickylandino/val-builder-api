@@ -1,0 +1,10 @@
+using val_builder_api.Models;
+
+public interface IValAnnotationService
+{
+    Task<IEnumerable<Valannotation>> GetAllAsync();
+    Task<Valannotation?> GetByIdAsync(int id);
+    Task<Valannotation> AddAsync(Valannotation annotation);
+    Task<Valannotation?> UpdateAsync(int id, Valannotation annotation);
+    Task<bool> DeleteAsync(int id);
+}
