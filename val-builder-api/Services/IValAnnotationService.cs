@@ -7,4 +7,5 @@ public interface IValAnnotationService
     Task<Valannotation> AddAsync(Valannotation annotation);
     Task<Valannotation?> UpdateAsync(int id, Valannotation annotation);
     Task<bool> DeleteAsync(int id);
+    Task<IEnumerable<Valannotation>> GetByValIdAsync(int valId);
 }

@@ -46,4 +46,11 @@ public class ValAnnotationService : IValAnnotationService
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<IEnumerable<Valannotation>> GetByValIdAsync(int valId)
+    {
+        return await _context.Valannotations
+            .Where(a => a.ValId == valId)
+            .ToListAsync();
+    }
 }

@@ -37,7 +37,7 @@ public class ValDetailsControllerTests
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
-        var returnedDetails = Assert.IsAssignableFrom<IEnumerable<Valdetail>>(okResult.Value);
+        var returnedDetails = Assert.IsType<IEnumerable<Valdetail>>(okResult.Value, exactMatch: false);
         Assert.Equal(2, returnedDetails.Count());
     }
 
@@ -60,7 +60,7 @@ public class ValDetailsControllerTests
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
-        var returnedDetails = Assert.IsAssignableFrom<IEnumerable<Valdetail>>(okResult.Value);
+        var returnedDetails = Assert.IsType<IEnumerable<Valdetail>>(okResult.Value, exactMatch: false);
         Assert.Single(returnedDetails);
         Assert.All(returnedDetails, d => Assert.Equal(groupId, d.GroupId));
     }

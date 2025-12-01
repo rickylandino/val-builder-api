@@ -47,4 +47,11 @@ public class ValAnnotationsController : ControllerBase
         if (!deleted) return NotFound();
         return NoContent();
     }
+
+    [HttpGet("byval/{valId}")]
+    public async Task<ActionResult<IEnumerable<Valannotation>>> GetByValId(int valId)
+    {
+        var items = await _service.GetByValIdAsync(valId);
+        return Ok(items);
+    }
 }

@@ -88,4 +88,22 @@ public class ValAnnotationServiceTests : IDisposable
         result.Should().BeTrue();
         (await _context.Valannotations.CountAsync()).Should().Be(0);
     }
+
+    [Fact]
+    public async Task GetByValIdAsync_ReturnsAnnotationsForGivenValId()
+    {
+        var items = new[] {
+            new Valannotation { AnnotationId = 1, ValId = 1, AnnotationContent = "A" },
+            new Valannotation { AnnotationId = 2, ValId = 2, AnnotationContent = "B" },
+            new Valannotation { AnnotationId = 3, ValId = 1, AnnotationContent = "C" }
+        };
+        await _context.Valannotations.AddRangeAsync(items);
+        await _context.SaveChangesAsync();
+
+        var result = (await _service.GetByValIdAsync(1)).ToList();
+        result.Should().HaveCount(2);
+        result.Should().Contain(x => x.AnnotationContent == "A");
+        result.Should().Contain(x => x.AnnotationContent == "C");
+        result.Should().NotContain(x => x.AnnotationContent == "B");
+    }
 }

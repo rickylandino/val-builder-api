@@ -96,4 +96,28 @@ public class ValAnnotationsControllerTests
         var result = await _controller.Delete(1);
         result.Should().BeOfType<NotFoundResult>();
     }
+
+    [Fact]
+    public async Task GetByValId_ReturnsOkWithAnnotations()
+    {
+        var items = new[] {
+            new Valannotation { AnnotationId = 1, ValId = 1 },
+            new Valannotation { AnnotationId = 2, ValId = 1 }
+        };
+        _mockService.Setup(s => s.GetByValIdAsync(1)).ReturnsAsync(items);
+
+        var result = await _controller.GetByValId(1);
+        var ok = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        ((IEnumerable<Valannotation>)ok.Value!).Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async Task GetByValId_ReturnsEmptyList_WhenNoneExist()
+    {
+        _mockService.Setup(s => s.GetByValIdAsync(99)).ReturnsAsync(new List<Valannotation>());
+
+        var result = await _controller.GetByValId(99);
+        var ok = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        ((IEnumerable<Valannotation>)ok.Value!).Should().BeEmpty();
+    }
 }
