@@ -26,4 +26,32 @@ public class CompanyService : ICompanyService
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.CompanyId == id);
     }
+
+    public async Task<Company> CreateCompanyAsync(Company company)
+    {
+        _context.Companies.Add(company);
+        await _context.SaveChangesAsync();
+        return company;
+    }
+
+    public async Task<Company?> UpdateCompanyAsync(int id, Company company)
+    {
+        var existing = await _context.Companies.FindAsync(id);
+        if (existing == null)
+            return null;
+
+        // Update properties
+        existing.Name = company.Name;
+        existing.MailingName = company.MailingName;
+        existing.Street1 = company.Street1;
+        existing.Street2 = company.Street2;
+        existing.City = company.City;
+        existing.State = company.State;
+        existing.Zip = company.Zip;
+        existing.Phone = company.Phone;
+        existing.Fax = company.Fax;
+
+        await _context.SaveChangesAsync();
+        return existing;
+    }
 }

@@ -46,4 +46,36 @@ public class CompaniesController : ControllerBase
         
         return Ok(company);
     }
+
+    /// <summary>
+    /// Create a new company
+    /// </summary>
+    /// <param name="company">Company data</param>
+    /// <returns>Created company</returns>
+    [HttpPost]
+    [ProducesResponseType(typeof(Company), StatusCodes.Status201Created)]
+    public async Task<ActionResult<Company>> CreateCompany([FromBody] Company company)
+    {
+        var created = await _companyService.CreateCompanyAsync(company);
+        return CreatedAtAction(nameof(GetCompanyById), new { id = created.CompanyId }, created);
+    }
+
+    /// <summary>
+    /// Update an existing company
+    /// </summary>
+    /// <param name="id">Company ID</param>
+    /// <param name="company">Updated company data</param>
+    /// <returns>Updated company</returns>
+    [HttpPut("{id}")]
+    [ProducesResponseType(typeof(Company), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<Company>> UpdateCompany(int id, [FromBody] Company company)
+    {
+        var updated = await _companyService.UpdateCompanyAsync(id, company);
+        if (updated == null)
+        {
+            return NotFound(new { message = $"Company with ID {id} not found." });
+        }
+        return Ok(updated);
+    }
 }

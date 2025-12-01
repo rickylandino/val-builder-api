@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <!-- Output formats -->
+          <Format>cobertura,opencover</Format>
+          
+          <!-- Exclude test projects, generated code, and infrastructure -->
+          <Exclude>[*.Tests]*,[*]*.Program,[*]*Migrations*,[*]Microsoft.AspNetCore.OpenApi.Generated*</Exclude>
+          
+          <!-- Exclude specific namespaces -->
+          <ExcludeByFile>**/Program.cs,**/Migrations/**/*,**/*.Generated.cs</ExcludeByFile>
+          
+          <!-- Exclude by attribute -->
+          <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute,ExcludeFromCodeCoverageAttribute</ExcludeByAttribute>
+          
+          <!-- Don't include test assemblies in coverage -->
+          <IncludeTestAssembly>false</IncludeTestAssembly>
+          
+          <!-- Use source link -->
+          <UseSourceLink>true</UseSourceLink>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

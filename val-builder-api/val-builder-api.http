@@ -11,3 +11,27 @@ GET {{val_builder_api_HostAddress}}/api/companies/2
 Accept: application/json
 
 ###
+
+### Get all valsections
+GET {{val_builder_api_HostAddress}}/api/valsections
+Accept: application/json
+
+###
+
+### Generate VAL PDF (Final - No Headers, With Watermark)
+GET {{val_builder_api_HostAddress}}/api/val/4/pdf
+
+###
+
+### Generate VAL PDF (With Section Headers, No Watermark)
+GET {{val_builder_api_HostAddress}}/api/val/4/pdf?includeHeaders=true&showWatermark=false
+
+###
+
+### Generate VAL PDF (With Section Headers, With Watermark)
+GET {{val_builder_api_HostAddress}}/api/val/4/pdf?includeHeaders=true&showWatermark=true
+
+###
+
+### Generate VAL PDF (No Headers, No Watermark - Final Clean)
+GET {{val_builder_api_HostAddress}}/api/val/4/pdf?showWatermark=false

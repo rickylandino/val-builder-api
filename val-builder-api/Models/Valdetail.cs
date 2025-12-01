@@ -6,12 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace val_builder_api.Models;
 
-[Keyless]
 [Table("VALDetails")]
 public partial class Valdetail
 {
+    [Key]
     [Column("ValDetailsID")]
-    public Guid? ValDetailsId { get; set; }
+    public Guid ValDetailsId { get; set; }
 
     [Column("ValID")]
     public int? ValId { get; set; }

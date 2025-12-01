@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace val_builder_api.Models;
 
-[Keyless]
 [Table("VALTemplateItems")]
 public partial class ValtemplateItem
 {
+    [Key]
     [Column("ItemID")]
     public int ItemId { get; set; }
 
