@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using val_builder_api.Data;
 using val_builder_api.Models;
 
+namespace val_builder_api.Services;
+
 public class ValAnnotationService : IValAnnotationService
 {
     private readonly ApplicationDbContext _context;

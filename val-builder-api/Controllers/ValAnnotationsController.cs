@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using val_builder_api.Models;
 using val_builder_api.Services;
 
+namespace val_builder_api.Controllers;
+
 [ApiController]
 [Route("api/valannotations")]
 public class ValAnnotationsController : ControllerBase

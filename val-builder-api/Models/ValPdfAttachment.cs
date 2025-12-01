@@ -8,7 +8,7 @@ public class ValPdfAttachment
 {
     [Key]
     [Column("PDFId")]
-    public int PDFId { get; set; }
+    public int? PDFId { get; set; }
 
     [Column("ValID")]
     public int? ValID { get; set; }

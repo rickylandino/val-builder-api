@@ -1,5 +1,7 @@
 using val_builder_api.Models;
 
+namespace val_builder_api.Services;
+
 public interface IValAnnotationService
 {
     Task<IEnumerable<Valannotation>> GetAllAsync();

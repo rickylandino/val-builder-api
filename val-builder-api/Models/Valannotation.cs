@@ -11,7 +11,7 @@ public partial class Valannotation
 {
     [Key]
     [Column("AnnotationID")]
-    public int AnnotationId { get; set; }
+    public int? AnnotationId { get; set; }
 
     [StringLength(50)]
     public string? Author { get; set; }

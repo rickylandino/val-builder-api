@@ -1,8 +1,7 @@
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using val_builder_api.Data;
 using val_builder_api.Models;
-using val_builder_api.Services.Impl;
+using val_builder_api.Services;
 using Xunit;
 
 namespace val_builder_api.Tests.Services;

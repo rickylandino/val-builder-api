@@ -48,7 +48,7 @@ public class ValPdfService : IValPdfService
             .OrderBy(d => d.DisplayOrder)
             .Select(d => new ValPdfDetail
             {
-                ValDetailsId = d.ValDetailsId,
+                ValDetailsId = d.ValDetailsId.Value,
                 GroupId = d.GroupId ?? 0,
                 DetailText = d.GroupContent ?? "",
                 DisplayOrder = d.DisplayOrder ?? 0,

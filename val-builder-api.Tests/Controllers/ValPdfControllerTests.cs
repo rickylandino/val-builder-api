@@ -11,14 +11,12 @@ namespace val_builder_api.Tests.Controllers;
 public class ValPdfControllerTests
 {
     private readonly Mock<IValPdfService> _mockPdfService;
-    private readonly Mock<ILogger<ValPdfController>> _mockLogger;
     private readonly ValPdfController _controller;
 
     public ValPdfControllerTests()
     {
         _mockPdfService = new Mock<IValPdfService>();
-        _mockLogger = new Mock<ILogger<ValPdfController>>();
-        _controller = new ValPdfController(_mockPdfService.Object, _mockLogger.Object);
+        _controller = new ValPdfController(_mockPdfService.Object);
     }
 
     [Fact]

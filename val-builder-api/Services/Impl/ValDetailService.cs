@@ -96,7 +96,7 @@ public class ValDetailService : IValDetailService
         // Only use transactions if supported
         var providerName = _context.Database.ProviderName ?? string.Empty;
         var useTransaction = !providerName.Equals("Microsoft.EntityFrameworkCore.InMemory", StringComparison.OrdinalIgnoreCase);
-        IDbContextTransaction transaction = null;
+        IDbContextTransaction? transaction = null;
         if (useTransaction)
         {
             transaction = await _context.Database.BeginTransactionAsync();
@@ -167,7 +167,7 @@ public class ValDetailService : IValDetailService
                 }
             }
 
-            if (errors.Any())
+            if (errors.Count > 0)
             {
                 result.Success = false;
                 result.Errors = errors;

@@ -2,7 +2,7 @@ namespace val_builder_api.Models;
 
 public class ValDetailChangeDto
 {
-    public int ValId { get; set; }
+    public int? ValId { get; set; }
     public List<ValDetailChange> Changes { get; set; } = new();
 }
 
