@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using val_builder_api.Data;
 using val_builder_api.Dto;
@@ -678,5 +682,188 @@ public class ValDetailServiceTests
         Assert.True(result.Success);
         Assert.Equal(1, result.ItemsCreated);
         Assert.Single(context.Valdetails);
+    }
+
+    [Fact]
+    public async Task UpdateValDetailAsync_UpdatesAllFields()
+    {
+        using var context = GetInMemoryContext();
+        var service = new ValDetailService(context);
+
+        var id = Guid.NewGuid();
+        var detail = new Valdetail
+        {
+            ValDetailsId = id,
+            ValId = 1,
+            GroupId = 1,
+            GroupContent = "Original",
+            DisplayOrder = 1,
+            Bullet = false,
+            Indent = 0,
+            Bold = false,
+            Center = false,
+            BlankLineAfter = 0,
+            TightLineHeight = false
+        };
+
+        context.Valdetails.Add(detail);
+        await context.SaveChangesAsync();
+
+        var updateDetail = new Valdetail
+        {
+            ValDetailsId = id,
+            ValId = 2,
+            GroupId = 2,
+            GroupContent = "Updated",
+            DisplayOrder = 2,
+            Bullet = true,
+            Indent = 2,
+            Bold = true,
+            Center = true,
+            BlankLineAfter = 1,
+            TightLineHeight = true
+        };
+
+        var result = await service.UpdateValDetailAsync(id, updateDetail);
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.ValId);
+        Assert.Equal(2, result.GroupId);
+        Assert.Equal("Updated", result.GroupContent);
+        Assert.Equal(2, result.DisplayOrder);
+        Assert.True(result.Bullet);
+        Assert.Equal(2, result.Indent);
+        Assert.True(result.Bold);
+        Assert.True(result.Center);
+        Assert.Equal(1, result.BlankLineAfter);
+        Assert.True(result.TightLineHeight);
+    }
+
+    [Fact]
+    public async Task SaveValDetailChangesAsync_HandlesEmptyChangesList()
+    {
+        using var context = GetInMemoryContext();
+        var service = new ValDetailService(context);
+
+        var dto = new ValDetailChangeDto
+        {
+            ValId = 1,
+            Changes = new List<ValDetailChange>()
+        };
+
+        var result = await service.SaveValDetailChangesAsync(dto);
+
+        Assert.True(result.Success);
+        Assert.Equal(0, result.ItemsCreated);
+        Assert.Equal(0, result.ItemsUpdated);
+        Assert.Equal(0, result.ItemsDeleted);
+        Assert.Equal("Successfully processed 0 creates, 0 updates, and 0 deletes.", result.Message);
+    }
+
+    [Fact]
+    public async Task CreateValDetailAsync_GeneratesGuid_WhenEmpty()
+    {
+        using var context = GetInMemoryContext();
+        var service = new ValDetailService(context);
+
+        var detail = new Valdetail
+        {
+            ValDetailsId = Guid.Empty,
+            ValId = 1,
+            GroupContent = "Should get new Guid"
+        };
+
+        var result = await service.CreateValDetailAsync(detail);
+
+        Assert.NotEqual(Guid.Empty, result.ValDetailsId);
+    }
+
+    [Fact]
+    public async Task HandleUpdateAsync_AddsError_WhenNotFound()
+    {
+        using var context = GetInMemoryContext();
+        var service = new ValDetailService(context);
+
+        // Use reflection to call private method
+        var method = typeof(ValDetailService).GetMethod("HandleUpdateAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        var change = new ValDetailChange
+        {
+            Action = "update",
+            Detail = new Valdetail { ValDetailsId = Guid.NewGuid(), ValId = 1, GroupContent = "Not found" }
+        };
+        var result = new ValDetailSaveResult();
+        var errors = new List<string>();
+
+        var task = (Task)method.Invoke(service, new object[] { change, result, errors });
+        await task;
+
+        Assert.Single(errors);
+        Assert.Contains("not found", errors[0]);
+    }
+
+    [Fact]
+    public async Task HandleDeleteAsync_AddsError_WhenNotFound()
+    {
+        using var context = GetInMemoryContext();
+        var service = new ValDetailService(context);
+
+        // Use reflection to call private method
+        var method = typeof(ValDetailService).GetMethod("HandleDeleteAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        var change = new ValDetailChange
+        {
+            Action = "delete",
+            Detail = new Valdetail { ValDetailsId = Guid.NewGuid() }
+        };
+        var result = new ValDetailSaveResult();
+        var errors = new List<string>();
+
+        var task = (Task)method.Invoke(service, new object[] { change, result, errors });
+        await task;
+
+        Assert.Single(errors);
+        Assert.Contains("not found", errors[0]);
+    }
+
+    [Fact]
+    public async Task SaveValDetailChangesAsync_HandlesCaseInsensitiveActions()
+    {
+        using var context = GetInMemoryContext();
+        var service = new ValDetailService(context);
+
+        var id = Guid.NewGuid();
+        context.Valdetails.Add(new Valdetail { ValDetailsId = id, ValId = 1, GroupContent = "Original" });
+        await context.SaveChangesAsync();
+
+        var dto = new ValDetailChangeDto
+        {
+            ValId = 1,
+            Changes = new List<ValDetailChange>
+            {
+                new ValDetailChange
+                {
+                    Action = "CREATE",
+                    Detail = new Valdetail { ValId = 1, GroupContent = "Uppercase Create" }
+                },
+                new ValDetailChange
+                {
+                    Action = "Update",
+                    Detail = new Valdetail { ValDetailsId = id, ValId = 1, GroupContent = "Uppercase Update" }
+                },
+                new ValDetailChange
+                {
+                    Action = "DELETE",
+                    Detail = new Valdetail { ValDetailsId = id }
+                }
+            }
+        };
+
+        var result = await service.SaveValDetailChangesAsync(dto);
+
+        Assert.True(result.Success);
+        Assert.Equal(1, result.ItemsCreated);
+        Assert.Equal(1, result.ItemsUpdated);
+        Assert.Equal(1, result.ItemsDeleted);
     }
 }

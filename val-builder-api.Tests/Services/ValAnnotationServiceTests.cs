@@ -107,6 +107,17 @@ public class ValAnnotationServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task UpdateAsync_ReturnsFalse_WhenAnnotationDoesNotExist()
+    {
+        // Act
+        var result = await _service.UpdateAsync(999, null); // 999 does not exist
+
+        // Assert
+        result.Should().BeNull();
+        (await _context.Valannotations.CountAsync()).Should().Be(0);
+    }
+
+    [Fact]
     public async Task DeleteAsync_ReturnsFalse_WhenAnnotationDoesNotExist()
     {
         // Act
