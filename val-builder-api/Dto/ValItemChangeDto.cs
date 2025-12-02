@@ -1,4 +1,4 @@
-namespace val_builder_api.Models;
+namespace val_builder_api.Dto;
 
 public class ValItemChangeDto
 {

@@ -2,6 +2,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using val_builder_api.Controllers;
+using val_builder_api.Dto;
 using val_builder_api.Models;
 using val_builder_api.Services;
 using Xunit;
@@ -83,5 +84,29 @@ public class ValTemplateItemsControllerTests
         _mockService.Setup(s => s.UpdateValTemplateItemAsync(999, item)).ReturnsAsync((ValtemplateItem?)null);
         var result = await _controller.UpdateValTemplateItem(999, item);
         result.Result.Should().BeOfType<NotFoundObjectResult>();
+    }
+
+    [Fact]
+    public async Task UpdateDisplayOrderBulk_ReturnsNoContent_OnSuccess()
+    {
+        var mockService = new Mock<IValTemplateItemService>();
+        mockService.Setup(s => s.UpdateDisplayOrderBulkAsync(It.IsAny<int>(), It.IsAny<List<ValTemplateItemDisplayOrderUpdateDto.ItemOrder>>()))
+            .Returns(Task.CompletedTask);
+
+        var controller = new ValTemplateItemsController(mockService.Object);
+
+        var dto = new ValTemplateItemDisplayOrderUpdateDto
+        {
+            GroupId = 2,
+            Items = new List<ValTemplateItemDisplayOrderUpdateDto.ItemOrder>
+            {
+                new() { ItemId = 10, DisplayOrder = 1 },
+                new() { ItemId = 11, DisplayOrder = 2 }
+            }
+        };
+
+        var result = await controller.UpdateDisplayOrderBulk(dto);
+
+        Assert.IsType<NoContentResult>(result);
     }
 }

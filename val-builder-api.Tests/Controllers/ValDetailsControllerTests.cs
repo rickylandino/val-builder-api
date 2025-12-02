@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using val_builder_api.Controllers;
+using val_builder_api.Dto;
 using val_builder_api.Models;
 using val_builder_api.Services;
-using Xunit;
 
 namespace val_builder_api.Tests.Controllers;
 

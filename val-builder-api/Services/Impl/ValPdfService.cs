@@ -48,7 +48,7 @@ public class ValPdfService : IValPdfService
             .OrderBy(d => d.DisplayOrder)
             .Select(d => new ValPdfDetail
             {
-                ValDetailsId = d.ValDetailsId.Value,
+                ValDetailsId = d.ValDetailsId ?? Guid.Empty,
                 GroupId = d.GroupId ?? 0,
                 DetailText = d.GroupContent ?? "",
                 DisplayOrder = d.DisplayOrder ?? 0,
@@ -315,7 +315,7 @@ public class ValPdfService : IValPdfService
                 var innerText = content.Substring(pTagEnd + 1, pTagClose - pTagEnd - 1);
 
                 // Strip chevrons from inner text
-                innerText = System.Text.RegularExpressions.Regex.Replace(innerText, @"<<\s*(.*?)\s*>>", "$1");
+                innerText = System.Text.RegularExpressions.Regex.Replace(innerText, @"(&lt;&lt;|\<\<)\s*(.*?)\s*(\>\>|&gt;&gt;)", "$2");
 
                 // Rebuild the <p> tag with classes
                 if (openTag.Contains("class="))
@@ -332,14 +332,14 @@ public class ValPdfService : IValPdfService
         else
         {
             // Strip chevrons from plain text or other HTML
-            content = System.Text.RegularExpressions.Regex.Replace(content, @"<<\s*(.*?)\s*>>", "$1");
+            content = System.Text.RegularExpressions.Regex.Replace(content, @"(&lt;&lt;|\<\<)\s*(.*?)\s*(\>\>|&gt;&gt;)", "$2");
             content = $"<p class='{classAttr}'>{content}</p>";
         }
 
         return content;
     }
 
-    private string GetCssStyles()
+    private static string GetCssStyles()
     {
         return @"
 @import url('https://fonts.googleapis.com/css2?family=Questrial&display=swap');

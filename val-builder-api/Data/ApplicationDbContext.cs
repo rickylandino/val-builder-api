@@ -26,8 +26,6 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<Valheader> Valheaders { get; set; }
 
-    public virtual DbSet<Valitem> Valitems { get; set; }
-
     public virtual DbSet<Valsection> Valsections { get; set; }
 
     public virtual DbSet<ValsubContent> ValsubContents { get; set; }

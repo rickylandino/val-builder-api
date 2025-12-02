@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using val_builder_api.Dto;
 using val_builder_api.Models;
 using val_builder_api.Services;
 
@@ -68,4 +69,22 @@ public class ValTemplateItemsController : ControllerBase
         }
         return Ok(updated);
     }
+
+    /// <summary>
+    /// Updates the DisplayOrder of ValTemplateItems in bulk for a specific valId and groupId
+    /// </summary>
+    [HttpPut("displayorder")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateDisplayOrderBulk([FromBody] ValTemplateItemDisplayOrderUpdateDto dto)
+    {
+        if (dto == null || dto.Items == null || !dto.Items.Any())
+        {
+            return BadRequest(new { message = "Invalid payload." });
+        }
+
+        await _service.UpdateDisplayOrderBulkAsync(dto.GroupId, dto.Items);
+        return NoContent();
+    }
+
 }

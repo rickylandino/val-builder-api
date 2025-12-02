@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using val_builder_api.Data;
+using val_builder_api.Dto;
 using val_builder_api.Models;
 
 namespace val_builder_api.Services.Impl;
@@ -88,19 +89,31 @@ public class ValDetailService : IValDetailService
         return true;
     }
 
+    protected static async Task HandleTransaction(IDbContextTransaction? transaction, string action)
+    {
+        switch(action)
+        {
+            case "commit":
+                if (transaction != null)
+                    await transaction.CommitAsync();
+                break;
+            case "rollback":
+                if (transaction != null)
+                    await transaction.RollbackAsync();
+                break;
+        }
+    }
+
     public async Task<ValDetailSaveResult> SaveValDetailChangesAsync(ValDetailChangeDto dto)
     {
         var result = new ValDetailSaveResult { Success = false };
         var errors = new List<string>();
 
-        // Only use transactions if supported
         var providerName = _context.Database.ProviderName ?? string.Empty;
         var useTransaction = !providerName.Equals("Microsoft.EntityFrameworkCore.InMemory", StringComparison.OrdinalIgnoreCase);
         IDbContextTransaction? transaction = null;
         if (useTransaction)
-        {
             transaction = await _context.Database.BeginTransactionAsync();
-        }
 
         try
         {
@@ -115,52 +128,14 @@ public class ValDetailService : IValDetailService
                 switch (change.Action.ToLower())
                 {
                     case "create":
-                        if (change.Detail.ValDetailsId == Guid.Empty)
-                        {
-                            change.Detail.ValDetailsId = Guid.NewGuid();
-                        }
-                        _context.Valdetails.Add(change.Detail);
-                        result.ItemsCreated++;
+                        HandleCreate(change, result);
                         break;
-
                     case "update":
-                        var existing = await _context.Valdetails
-                            .FirstOrDefaultAsync(d => d.ValDetailsId == change.Detail.ValDetailsId);
-
-                        if (existing == null)
-                        {
-                            errors.Add($"ValDetail with ID {change.Detail.ValDetailsId} not found for update.");
-                            continue;
-                        }
-
-                        existing.ValId = change.Detail.ValId;
-                        existing.GroupId = change.Detail.GroupId;
-                        existing.GroupContent = change.Detail.GroupContent;
-                        existing.DisplayOrder = change.Detail.DisplayOrder;
-                        existing.Bullet = change.Detail.Bullet;
-                        existing.Indent = change.Detail.Indent;
-                        existing.Bold = change.Detail.Bold;
-                        existing.Center = change.Detail.Center;
-                        existing.BlankLineAfter = change.Detail.BlankLineAfter;
-                        existing.TightLineHeight = change.Detail.TightLineHeight;
-
-                        result.ItemsUpdated++;
+                        await HandleUpdateAsync(change, result, errors);
                         break;
-
                     case "delete":
-                        var toDelete = await _context.Valdetails
-                            .FirstOrDefaultAsync(d => d.ValDetailsId == change.Detail.ValDetailsId);
-
-                        if (toDelete == null)
-                        {
-                            errors.Add($"ValDetail with ID {change.Detail.ValDetailsId} not found for delete.");
-                            continue;
-                        }
-
-                        _context.Valdetails.Remove(toDelete);
-                        result.ItemsDeleted++;
+                        await HandleDeleteAsync(change, result, errors);
                         break;
-
                     default:
                         errors.Add($"Unknown action: {change.Action}");
                         break;
@@ -172,14 +147,12 @@ public class ValDetailService : IValDetailService
                 result.Success = false;
                 result.Errors = errors;
                 result.Message = $"Completed with {errors.Count} error(s).";
-                if (transaction != null)
-                    await transaction.RollbackAsync();
+                await HandleTransaction(transaction, "rollback");
                 return result;
             }
 
             await _context.SaveChangesAsync();
-            if (transaction != null)
-                await transaction.CommitAsync();
+            await HandleTransaction(transaction, "commit");
 
             result.Success = true;
             result.Message = $"Successfully processed {result.ItemsCreated} creates, {result.ItemsUpdated} updates, and {result.ItemsDeleted} deletes.";
@@ -187,12 +160,61 @@ public class ValDetailService : IValDetailService
         }
         catch (Exception ex)
         {
-            if (transaction != null)
-                await transaction.RollbackAsync();
+            await HandleTransaction(transaction, "rollback");
             result.Success = false;
             result.Error = ex.Message;
             result.Message = "An error occurred while saving changes.";
             return result;
+        }
+    }
+
+    private void HandleCreate(ValDetailChange change, ValDetailSaveResult result)
+    {
+        if (change.Detail != null)
+        {
+            if (change.Detail.ValDetailsId == Guid.Empty)
+                change.Detail.ValDetailsId = Guid.NewGuid();
+            _context.Valdetails.Add(change.Detail);
+            result.ItemsCreated++;
+        }
+    }
+
+    private async Task HandleUpdateAsync(ValDetailChange change, ValDetailSaveResult result, List<string> errors)
+    {
+        if (change.Detail != null)
+        {
+            var existing = await _context.Valdetails.FirstOrDefaultAsync(d => d.ValDetailsId == change.Detail.ValDetailsId);
+            if (existing == null)
+            {
+                errors.Add($"ValDetail with ID {change.Detail.ValDetailsId} not found for update.");
+                return;
+            }
+            existing.ValId = change.Detail.ValId;
+            existing.GroupId = change.Detail.GroupId;
+            existing.GroupContent = change.Detail.GroupContent;
+            existing.DisplayOrder = change.Detail.DisplayOrder;
+            existing.Bullet = change.Detail.Bullet;
+            existing.Indent = change.Detail.Indent;
+            existing.Bold = change.Detail.Bold;
+            existing.Center = change.Detail.Center;
+            existing.BlankLineAfter = change.Detail.BlankLineAfter;
+            existing.TightLineHeight = change.Detail.TightLineHeight;
+            result.ItemsUpdated++;
+        }
+    }
+
+    private async Task HandleDeleteAsync(ValDetailChange change, ValDetailSaveResult result, List<string> errors)
+    {
+        if (change.Detail != null)
+        {
+            var toDelete = await _context.Valdetails.FirstOrDefaultAsync(d => d.ValDetailsId == change.Detail.ValDetailsId);
+            if (toDelete == null)
+            {
+                errors.Add($"ValDetail with ID {change.Detail.ValDetailsId} not found for delete.");
+                return;
+            }
+            _context.Valdetails.Remove(toDelete);
+            result.ItemsDeleted++;
         }
     }
 }

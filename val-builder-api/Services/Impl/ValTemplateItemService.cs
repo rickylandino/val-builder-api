@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using val_builder_api.Data;
+using val_builder_api.Dto;
 using val_builder_api.Models;
 
 namespace val_builder_api.Services.Impl;
@@ -18,7 +19,7 @@ public class ValTemplateItemService : IValTemplateItemService
         return await _context.ValtemplateItems
             .AsNoTracking()
             .Where(x => x.GroupId == groupId)
-            .OrderByDescending(x => x.DisplayOrder)
+            .OrderBy(x => x.DisplayOrder)
             .ToListAsync();
     }
 
@@ -53,5 +54,21 @@ public class ValTemplateItemService : IValTemplateItemService
         existing.TightLineHeight = item.TightLineHeight;
         await _context.SaveChangesAsync();
         return existing;
+    }
+
+    public async Task UpdateDisplayOrderBulkAsync(int groupId, List<ValTemplateItemDisplayOrderUpdateDto.ItemOrder> items)
+    {
+        // Example: update items in DB context (pseudo-code, adapt to your ORM)
+        foreach (var item in items)
+        {
+            var entity = await _context.ValtemplateItems
+                .FirstOrDefaultAsync(x => x.ItemId == item.ItemId && x.GroupId == groupId);
+
+            if (entity != null)
+            {
+                entity.DisplayOrder = item.DisplayOrder;
+            }
+        }
+        await _context.SaveChangesAsync();
     }
 }

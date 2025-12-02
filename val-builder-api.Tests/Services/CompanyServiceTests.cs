@@ -236,4 +236,50 @@ public class CompanyServiceTests : IDisposable
         // Assert
         _context.ChangeTracker.Entries().Should().BeEmpty();
     }
+
+    [Fact]
+    public async Task CreateCompanyAsync_AddsCompany()
+    {
+        // Arrange
+        var company = new Company { Name = "NewCo" };
+
+        // Act
+        var result = await _companyService.CreateCompanyAsync(company);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Name.Should().Be("NewCo");
+        (await _context.Companies.CountAsync()).Should().Be(1);
+    }
+
+    [Fact]
+    public async Task UpdateCompanyAsync_UpdatesCompany_WhenExists()
+    {
+        // Arrange
+        var company = new Company { CompanyId = 1, Name = "OldName" };
+        await _context.Companies.AddAsync(company);
+        await _context.SaveChangesAsync();
+
+        company.Name = "UpdatedName";
+
+        // Act
+        var result = await _companyService.UpdateCompanyAsync(1, company);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Name.Should().Be("UpdatedName");
+    }
+
+    [Fact]
+    public async Task UpdateCompanyAsync_ReturnsNull_WhenNotExists()
+    {
+        // Arrange
+        var company = new Company { CompanyId = 999, Name = "DoesNotExist" };
+
+        // Act
+        var result = await _companyService.UpdateCompanyAsync(999, company);
+
+        // Assert
+        result.Should().BeNull();
+    }
 }
