@@ -561,4 +561,122 @@ public class ValDetailServiceTests
         Assert.NotEmpty(result.Errors);
         Assert.Empty(context.Valdetails); // Should have rolled back
     }
+
+    [Fact]
+    public async Task SaveValDetailChangesAsync_HandlesUnknownAction()
+    {
+        using var context = GetInMemoryContext();
+        var service = new ValDetailService(context);
+
+        var dto = new ValDetailChangeDto
+        {
+            ValId = 1,
+            Changes = new List<ValDetailChange>
+            {
+                new ValDetailChange
+                {
+                    Action = "unknown",
+                    Detail = new Valdetail { ValId = 1, GroupContent = "Should not process" }
+                }
+            }
+        };
+
+        var result = await service.SaveValDetailChangesAsync(dto);
+
+        Assert.False(result.Success);
+        Assert.NotNull(result.Errors);
+        Assert.Contains(result.Errors, e => e.Contains("Unknown action"));
+        Assert.Empty(context.Valdetails);
+    }
+
+    [Fact]
+    public async Task SaveValDetailChangesAsync_HandlesNullDetail()
+    {
+        using var context = GetInMemoryContext();
+        var service = new ValDetailService(context);
+
+        var dto = new ValDetailChangeDto
+        {
+            ValId = 1,
+            Changes = new List<ValDetailChange>
+            {
+                new ValDetailChange
+                {
+                    Action = "create",
+                    Detail = null
+                }
+            }
+        };
+
+        var result = await service.SaveValDetailChangesAsync(dto);
+
+        Assert.False(result.Success);
+        Assert.NotNull(result.Errors);
+        Assert.Contains(result.Errors, e => e.Contains("Detail object is null"));
+        Assert.Empty(context.Valdetails);
+    }
+
+    [Fact]
+    public async Task SaveValDetailChangesAsync_RollsBackTransactionOnError()
+    {
+        using var context = GetInMemoryContext();
+        var service = new ValDetailService(context);
+
+        // Add an existing detail
+        var id = Guid.NewGuid();
+        context.Valdetails.Add(new Valdetail { ValDetailsId = id, ValId = 1, GroupContent = "Existing" });
+        await context.SaveChangesAsync();
+
+        var dto = new ValDetailChangeDto
+        {
+            ValId = 1,
+            Changes = new List<ValDetailChange>
+            {
+                new ValDetailChange
+                {
+                    Action = "update",
+                    Detail = new Valdetail { ValDetailsId = Guid.NewGuid(), ValId = 1, GroupContent = "Non-existent" }
+                },
+                new ValDetailChange
+                {
+                    Action = "delete",
+                    Detail = new Valdetail { ValDetailsId = Guid.NewGuid() }
+                }
+            }
+        };
+
+        var result = await service.SaveValDetailChangesAsync(dto);
+
+        Assert.False(result.Success);
+        Assert.NotNull(result.Errors);
+        Assert.Contains(result.Errors, e => e.Contains("not found"));
+        // Should not have deleted the existing detail
+        Assert.Single(context.Valdetails);
+    }
+
+    [Fact]
+    public async Task SaveValDetailChangesAsync_CommitsTransactionOnSuccess()
+    {
+        using var context = GetInMemoryContext();
+        var service = new ValDetailService(context);
+
+        var dto = new ValDetailChangeDto
+        {
+            ValId = 1,
+            Changes = new List<ValDetailChange>
+            {
+                new ValDetailChange
+                {
+                    Action = "create",
+                    Detail = new Valdetail { ValId = 1, GroupContent = "Created" }
+                }
+            }
+        };
+
+        var result = await service.SaveValDetailChangesAsync(dto);
+
+        Assert.True(result.Success);
+        Assert.Equal(1, result.ItemsCreated);
+        Assert.Single(context.Valdetails);
+    }
 }

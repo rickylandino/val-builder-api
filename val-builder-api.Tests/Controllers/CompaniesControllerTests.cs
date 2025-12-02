@@ -227,4 +227,101 @@ public class CompaniesControllerTests
         attribute.Should().NotBeNull();
         attribute!.Template.Should().Be("api/[controller]");
     }
+
+    [Fact]
+    public async Task CreateCompany_ReturnsCreatedAtAction_WithCreatedCompany()
+    {
+        // Arrange
+        var newCompany = new Company
+        {
+            CompanyId = 0,
+            Name = "NewCo",
+            MailingName = "NewCo LLC",
+            City = "Boston",
+            State = "MA"
+        };
+        var createdCompany = new Company
+        {
+            CompanyId = 123,
+            Name = "NewCo",
+            MailingName = "NewCo LLC",
+            City = "Boston",
+            State = "MA"
+        };
+        _mockCompanyService
+            .Setup(s => s.CreateCompanyAsync(newCompany))
+            .ReturnsAsync(createdCompany);
+
+        // Act
+        var result = await _controller.CreateCompany(newCompany);
+
+        // Assert
+        var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
+        createdResult.ActionName.Should().Be(nameof(_controller.GetCompanyById));
+        createdResult.RouteValues!["id"].Should().Be(createdCompany.CompanyId);
+        var returnedCompany = createdResult.Value.Should().BeAssignableTo<Company>().Subject;
+        returnedCompany.Should().BeEquivalentTo(createdCompany);
+    }
+
+    [Fact]
+    public async Task UpdateCompany_WhenCompanyExists_ReturnsOkWithUpdatedCompany()
+    {
+        // Arrange
+        var companyId = 5;
+        var updateData = new Company
+        {
+            CompanyId = companyId,
+            Name = "UpdatedCo",
+            MailingName = "UpdatedCo LLC",
+            City = "Chicago",
+            State = "IL"
+        };
+        var updatedCompany = new Company
+        {
+            CompanyId = companyId,
+            Name = "UpdatedCo",
+            MailingName = "UpdatedCo LLC",
+            City = "Chicago",
+            State = "IL"
+        };
+        _mockCompanyService
+            .Setup(s => s.UpdateCompanyAsync(companyId, updateData))
+            .ReturnsAsync(updatedCompany);
+
+        // Act
+        var result = await _controller.UpdateCompany(companyId, updateData);
+
+        // Assert
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var returnedCompany = okResult.Value.Should().BeAssignableTo<Company>().Subject;
+        returnedCompany.Should().BeEquivalentTo(updatedCompany);
+    }
+
+    [Fact]
+    public async Task UpdateCompany_WhenCompanyDoesNotExist_ReturnsNotFoundWithMessage()
+    {
+        // Arrange
+        var companyId = 999;
+        var updateData = new Company
+        {
+            CompanyId = companyId,
+            Name = "GhostCo",
+            MailingName = "GhostCo LLC",
+            City = "Nowhere",
+            State = "ZZ"
+        };
+        _mockCompanyService
+            .Setup(s => s.UpdateCompanyAsync(companyId, updateData))
+            .ReturnsAsync((Company?)null);
+
+        // Act
+        var result = await _controller.UpdateCompany(companyId, updateData);
+
+        // Assert
+        var notFoundResult = result.Result.Should().BeOfType<NotFoundObjectResult>().Subject;
+        var responseValue = notFoundResult.Value.Should().BeAssignableTo<object>().Subject;
+        var messageProperty = responseValue.GetType().GetProperty("message");
+        messageProperty.Should().NotBeNull();
+        messageProperty!.GetValue(responseValue).Should().Be($"Company with ID {companyId} not found.");
+    }
 }

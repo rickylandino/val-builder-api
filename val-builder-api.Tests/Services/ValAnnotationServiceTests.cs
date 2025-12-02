@@ -105,4 +105,15 @@ public class ValAnnotationServiceTests : IDisposable
         result.Should().Contain(x => x.AnnotationContent == "C");
         result.Should().NotContain(x => x.AnnotationContent == "B");
     }
+
+    [Fact]
+    public async Task DeleteAsync_ReturnsFalse_WhenAnnotationDoesNotExist()
+    {
+        // Act
+        var result = await _service.DeleteAsync(999); // 999 does not exist
+
+        // Assert
+        result.Should().BeFalse();
+        (await _context.Valannotations.CountAsync()).Should().Be(0);
+    }
 }

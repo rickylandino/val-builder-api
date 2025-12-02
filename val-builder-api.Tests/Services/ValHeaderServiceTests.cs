@@ -71,4 +71,78 @@ public class ValHeaderServiceTests : IDisposable
         var updated = await _service.UpdateValHeaderAsync(999, header);
         updated.Should().BeNull();
     }
+
+    [Fact]
+    public async Task GetValHeadersByCompanyIdAsync_ReturnsHeadersWithMatchingPlanId()
+    {
+        // Arrange
+        var headers = new[]
+        {
+            new Valheader { ValDescription = "Header 1", PlanId = 10 },
+            new Valheader { ValDescription = "Header 2", PlanId = 10 },
+            new Valheader { ValDescription = "Header 3", PlanId = 20 }
+        };
+        await _context.Valheaders.AddRangeAsync(headers);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.GetValHeadersByCompanyIdAsync(10);
+
+        // Assert
+        result.Should().HaveCount(2);
+        result.Should().AllSatisfy(h => h.PlanId.Should().Be(10));
+        result.Select(h => h.ValDescription).Should().Contain(new[] { "Header 1", "Header 2" });
+    }
+
+    [Fact]
+    public async Task GetValHeadersByCompanyIdAsync_ReturnsEmpty_WhenNoMatch()
+    {
+        // Arrange
+        var header = new Valheader { ValDescription = "Header", PlanId = 99 };
+        await _context.Valheaders.AddAsync(header);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.GetValHeadersByCompanyIdAsync(123);
+
+        // Assert
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task GetValHeadersByPlanIdAsync_ReturnsHeadersWithMatchingPlanId()
+    {
+        // Arrange
+        var headers = new[]
+        {
+            new Valheader { ValDescription = "Header A", PlanId = 5 },
+            new Valheader { ValDescription = "Header B", PlanId = 5 },
+            new Valheader { ValDescription = "Header C", PlanId = 6 }
+        };
+        await _context.Valheaders.AddRangeAsync(headers);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.GetValHeadersByPlanIdAsync(5);
+
+        // Assert
+        result.Should().HaveCount(2);
+        result.Should().AllSatisfy(h => h.PlanId.Should().Be(5));
+        result.Select(h => h.ValDescription).Should().Contain(new[] { "Header A", "Header B" });
+    }
+
+    [Fact]
+    public async Task GetValHeadersByPlanIdAsync_ReturnsEmpty_WhenNoMatch()
+    {
+        // Arrange
+        var header = new Valheader { ValDescription = "Header", PlanId = 77 };
+        await _context.Valheaders.AddAsync(header);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.GetValHeadersByPlanIdAsync(88);
+
+        // Assert
+        result.Should().BeEmpty();
+    }
 }

@@ -78,12 +78,12 @@ public class ValTemplateItemsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateDisplayOrderBulk([FromBody] ValTemplateItemDisplayOrderUpdateDto dto)
     {
-        if (dto == null || dto.Items == null || !dto.Items.Any())
+        if (dto == null || dto.Items == null || dto.Items.Count == 0 || !dto.GroupId.HasValue)
         {
             return BadRequest(new { message = "Invalid payload." });
         }
 
-        await _service.UpdateDisplayOrderBulkAsync(dto.GroupId, dto.Items);
+        await _service.UpdateDisplayOrderBulkAsync(dto.GroupId.Value, dto.Items);
         return NoContent();
     }
 

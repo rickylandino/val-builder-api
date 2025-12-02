@@ -109,4 +109,46 @@ public class ValTemplateItemsControllerTests
 
         Assert.IsType<NoContentResult>(result);
     }
+
+    [Fact]
+    public async Task UpdateDisplayOrderBulk_ReturnsBadRequest_WhenDtoIsNull()
+    {
+        var result = await _controller.UpdateDisplayOrderBulk(null);
+
+        var badRequest = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequest.Value.Should().NotBeNull();
+        badRequest.Value.ToString().Should().Contain("Invalid payload");
+    }
+
+    [Fact]
+    public async Task UpdateDisplayOrderBulk_ReturnsBadRequest_WhenItemsIsNull()
+    {
+        var dto = new ValTemplateItemDisplayOrderUpdateDto
+        {
+            GroupId = 1,
+            Items = null
+        };
+
+        var result = await _controller.UpdateDisplayOrderBulk(dto);
+
+        var badRequest = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequest.Value.Should().NotBeNull();
+        badRequest.Value.ToString().Should().Contain("Invalid payload");
+    }
+
+    [Fact]
+    public async Task UpdateDisplayOrderBulk_ReturnsBadRequest_WhenItemsIsEmpty()
+    {
+        var dto = new ValTemplateItemDisplayOrderUpdateDto
+        {
+            GroupId = 1,
+            Items = new List<ValTemplateItemDisplayOrderUpdateDto.ItemOrder>()
+        };
+
+        var result = await _controller.UpdateDisplayOrderBulk(dto);
+
+        var badRequest = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequest.Value.Should().NotBeNull();
+        badRequest.Value.ToString().Should().Contain("Invalid payload");
+    }
 }

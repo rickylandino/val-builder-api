@@ -79,4 +79,52 @@ public class ValHeaderControllerTests
         var result = await _controller.UpdateValHeader(999, header);
         result.Result.Should().BeOfType<NotFoundObjectResult>();
     }
+
+    [Fact]
+    public async Task GetAllValHeaders_WithCompanyId_ReturnsFilteredByCompanyId()
+    {
+        var headers = new List<Valheader> { new Valheader { ValId = 1, ValDescription = "A", PlanId = 10 } };
+        _mockService.Setup(s => s.GetValHeadersByCompanyIdAsync(10)).ReturnsAsync(headers);
+
+        var result = await _controller.GetAllValHeaders(10, null);
+
+        var ok = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var returned = ok.Value.Should().BeAssignableTo<IEnumerable<Valheader>>().Subject;
+        returned.Should().BeEquivalentTo(headers);
+        _mockService.Verify(s => s.GetValHeadersByCompanyIdAsync(10), Times.Once);
+        _mockService.Verify(s => s.GetValHeadersByPlanIdAsync(It.IsAny<int>()), Times.Never);
+        _mockService.Verify(s => s.GetAllValHeadersAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetAllValHeaders_WithPlanId_ReturnsFilteredByPlanId()
+    {
+        var headers = new List<Valheader> { new Valheader { ValId = 2, ValDescription = "B", PlanId = 20 } };
+        _mockService.Setup(s => s.GetValHeadersByPlanIdAsync(20)).ReturnsAsync(headers);
+
+        var result = await _controller.GetAllValHeaders(null, 20);
+
+        var ok = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var returned = ok.Value.Should().BeAssignableTo<IEnumerable<Valheader>>().Subject;
+        returned.Should().BeEquivalentTo(headers);
+        _mockService.Verify(s => s.GetValHeadersByPlanIdAsync(20), Times.Once);
+        _mockService.Verify(s => s.GetValHeadersByCompanyIdAsync(It.IsAny<int>()), Times.Never);
+        _mockService.Verify(s => s.GetAllValHeadersAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetAllValHeaders_WithoutCompanyIdOrPlanId_ReturnsAllHeaders()
+    {
+        var headers = new List<Valheader> { new Valheader { ValId = 3, ValDescription = "C", PlanId = 30 } };
+        _mockService.Setup(s => s.GetAllValHeadersAsync()).ReturnsAsync(headers);
+
+        var result = await _controller.GetAllValHeaders(null, null);
+
+        var ok = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var returned = ok.Value.Should().BeAssignableTo<IEnumerable<Valheader>>().Subject;
+        returned.Should().BeEquivalentTo(headers);
+        _mockService.Verify(s => s.GetAllValHeadersAsync(), Times.Once);
+        _mockService.Verify(s => s.GetValHeadersByCompanyIdAsync(It.IsAny<int>()), Times.Never);
+        _mockService.Verify(s => s.GetValHeadersByPlanIdAsync(It.IsAny<int>()), Times.Never);
+    }
 }
