@@ -46,7 +46,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"rickylandino_val-builder-api" /o:"automated-concepts" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.exclusions="**/bin/**,**/obj/**,**/Program.cs,**/Data/ApplicationDbContext.cs" /d:sonar.coverage.exclusions="**/*.Tests/**,**/Tests/**,**/Program.cs,**/Data/ApplicationDbContext.cs" /d:sonar.test.exclusions="**/*.Tests/**,**/Tests/**,**/Program.cs,**/Data/ApplicationDbContext.cs"
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"rickylandino_val-builder-api" /o:"automated-concepts" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.exclusions="**/bin/**,**/obj/**,**/Program.cs" /d:sonar.coverage.exclusions="**/*.Tests/**,**/Tests/**,**/Program.cs" /d:sonar.test.exclusions="**/*.Tests/**,**/Tests/**,**/Program.cs"
           dotnet build --no-incremental
           dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
