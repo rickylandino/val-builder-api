@@ -11,7 +11,7 @@ public partial class ValtemplateItem
 {
     [Key]
     [Column("ItemID")]
-    public int ItemId { get; set; }
+    public int? ItemId { get; set; }
 
     [Column("GroupID")]
     public int? GroupId { get; set; }

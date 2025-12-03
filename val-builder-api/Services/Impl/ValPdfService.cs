@@ -30,7 +30,7 @@ public class ValPdfService : IValPdfService
             .Where(v => v.ValId == valId)
             .Select(v => new ValPdfHeader
             {
-                ValId = v.ValId,
+                ValId = v.ValId.Value,
                 ValDescription = v.ValDescription ?? "",
                 PlanYearBeginDate = v.PlanYearBeginDate,
                 PlanYearEndDate = v.PlanYearEndDate,

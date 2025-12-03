@@ -11,7 +11,7 @@ public partial class Valheader
 {
     [Key]
     [Column("ValID")]
-    public int ValId { get; set; }
+    public int? ValId { get; set; }
 
     public int? PlanId { get; set; }
 

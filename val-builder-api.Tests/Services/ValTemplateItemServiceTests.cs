@@ -33,7 +33,7 @@ public class ValTemplateItemServiceTests : IDisposable
         var item = new ValtemplateItem { GroupId = 1, ItemText = "A" };
         await _context.ValtemplateItems.AddAsync(item);
         await _context.SaveChangesAsync();
-        var found = await _service.GetValTemplateItemByIdAsync(item.ItemId);
+        var found = await _service.GetValTemplateItemByIdAsync(item.ItemId.Value);
         found.Should().NotBeNull();
         found!.ItemText.Should().Be("A");
     }
@@ -53,7 +53,7 @@ public class ValTemplateItemServiceTests : IDisposable
         var item = new ValtemplateItem { GroupId = 1, ItemText = "A" };
         await _service.CreateValTemplateItemAsync(item);
         item.ItemText = "B";
-        var updated = await _service.UpdateValTemplateItemAsync(item.ItemId, item);
+        var updated = await _service.UpdateValTemplateItemAsync(item.ItemId.Value, item);
         updated.Should().NotBeNull();
         updated!.ItemText.Should().Be("B");
     }
@@ -81,8 +81,8 @@ public class ValTemplateItemServiceTests : IDisposable
 
         var updateDto = new List<val_builder_api.Dto.ValTemplateItemDisplayOrderUpdateDto.ItemOrder>
         {
-            new() { ItemId = items[0].ItemId, DisplayOrder = 5 },
-            new() { ItemId = items[1].ItemId, DisplayOrder = 6 }
+            new() { ItemId = items[0].ItemId.Value, DisplayOrder = 5 },
+            new() { ItemId = items[1].ItemId.Value, DisplayOrder = 6 }
         };
 
         // Act

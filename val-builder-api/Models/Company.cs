@@ -9,7 +9,7 @@ namespace val_builder_api.Models;
 public partial class Company
 {
     [Key]
-    public int CompanyId { get; set; }
+    public int? CompanyId { get; set; }
 
     [StringLength(100)]
     [Unicode(false)]

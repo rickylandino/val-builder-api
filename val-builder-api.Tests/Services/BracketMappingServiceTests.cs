@@ -53,7 +53,7 @@ public class BracketMappingServiceTests : IDisposable
         var created = await _service.CreateAsync(mapping);
         created.TagName = "Tag2";
         created.ObjectPath = "Path2";
-        var updated = await _service.UpdateAsync(created.Id, created);
+        var updated = await _service.UpdateAsync(created.Id.Value, created);
         updated.Should().NotBeNull();
         updated!.TagName.Should().Be("Tag2");
         updated.ObjectPath.Should().Be("Path2");
@@ -64,7 +64,7 @@ public class BracketMappingServiceTests : IDisposable
     {
         var mapping = new BracketMapping { TagName = "Tag1", ObjectPath = "Path1" };
         var created = await _service.CreateAsync(mapping);
-        var deleted = await _service.DeleteAsync(created.Id);
+        var deleted = await _service.DeleteAsync(created.Id.Value);
         deleted.Should().BeTrue();
         (await _service.GetAllAsync()).Should().BeEmpty();
     }

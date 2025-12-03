@@ -48,7 +48,7 @@ public class ValHeaderServiceTests : IDisposable
     {
         var header = new Valheader { ValDescription = "Test Header" };
         await _service.CreateValHeaderAsync(header);
-        var found = await _service.GetValHeaderByIdAsync(header.ValId);
+        var found = await _service.GetValHeaderByIdAsync(header.ValId.Value);
         found.Should().NotBeNull();
         found!.ValDescription.Should().Be("Test Header");
     }
@@ -59,7 +59,7 @@ public class ValHeaderServiceTests : IDisposable
         var header = new Valheader { ValDescription = "Original" };
         await _service.CreateValHeaderAsync(header);
         header.ValDescription = "Updated";
-        var updated = await _service.UpdateValHeaderAsync(header.ValId, header);
+        var updated = await _service.UpdateValHeaderAsync(header.ValId.Value, header);
         updated.Should().NotBeNull();
         updated!.ValDescription.Should().Be("Updated");
     }

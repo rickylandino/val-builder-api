@@ -9,7 +9,7 @@ namespace val_builder_api.Models;
 public partial class CompanyPlan
 {
     [Key]
-    public int PlanId { get; set; }
+    public int? PlanId { get; set; }
 
     public int? CompanyId { get; set; }
 
