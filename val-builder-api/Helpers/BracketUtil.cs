@@ -4,13 +4,16 @@ using val_builder_api.Models;
 
 namespace val_builder_api.Helpers
 {
-    public static class BracketUtil
+    public static partial class BracketUtil
     {
+        [GeneratedRegex(@"\[\[(.*?)\]\]")]
+        private static partial Regex BracketTagRegex();
+
         public static async Task<string> ReplaceBracketTagsAsync(List<BracketMapping> mappings, string content, Valheader valHeader, Company company, CompanyPlan companyPlan)
         {
             if (string.IsNullOrEmpty(content)) return content;
 
-            return Regex.Replace(content, @"\[\[(.*?)\]\]", match =>
+            return BracketTagRegex().Replace(content, match =>
             {
                 var tag = match.Groups[1].Value.Trim();
                 var mapping = mappings.FirstOrDefault(m => m.TagName.Equals(tag, StringComparison.OrdinalIgnoreCase));
