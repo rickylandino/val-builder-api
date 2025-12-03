@@ -18,6 +18,7 @@ builder.Services.AddScoped<IValDetailService, ValDetailService>();
 builder.Services.AddScoped<IValPdfService, ValPdfService>();
 builder.Services.AddScoped<IValPdfAttachmentService, ValPdfAttachmentService>();
 builder.Services.AddScoped<IValAnnotationService, ValAnnotationService>();
+builder.Services.AddScoped<IBracketMappingService, BracketMappingService>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();

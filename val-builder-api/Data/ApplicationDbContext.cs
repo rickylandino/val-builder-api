@@ -38,6 +38,7 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<ValtemplateItem> ValtemplateItems { get; set; }
     public virtual DbSet<ValPdfAttachment> ValPdfAttachments { get; set; }
+    public virtual DbSet<BracketMapping> BracketMappings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

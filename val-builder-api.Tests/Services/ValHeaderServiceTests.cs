@@ -145,4 +145,48 @@ public class ValHeaderServiceTests : IDisposable
         // Assert
         result.Should().BeEmpty();
     }
+
+    [Fact]
+    public async Task CreateValHeaderAsync_CreatesValDetailsFromDefaultTemplateItems_WithSequentialDisplayOrderPerGroup()
+    {
+        // Arrange: Add template items with mixed DefaultOnVal and groups
+        var templateItems = new[]
+        {
+            new ValtemplateItem { GroupId = 1, ItemText = "A", DisplayOrder = 1, DefaultOnVal = true, Bold = true },
+            new ValtemplateItem { GroupId = 1, ItemText = "B", DisplayOrder = 2, DefaultOnVal = false },
+            new ValtemplateItem { GroupId = 1, ItemText = "C", DisplayOrder = 3, DefaultOnVal = true, Bullet = true },
+            new ValtemplateItem { GroupId = 2, ItemText = "D", DisplayOrder = 1, DefaultOnVal = true },
+            new ValtemplateItem { GroupId = 2, ItemText = "E", DisplayOrder = 2, DefaultOnVal = false },
+            new ValtemplateItem { GroupId = 2, ItemText = "F", DisplayOrder = 3, DefaultOnVal = true }
+        };
+        await _context.ValtemplateItems.AddRangeAsync(templateItems);
+        await _context.SaveChangesAsync();
+
+        var header = new Valheader { ValDescription = "Header with details" };
+
+        // Act
+        var created = await _service.CreateValHeaderAsync(header);
+
+        // Assert: Only DefaultOnVal items are copied, and DisplayOrder is sequential per group
+        var details = await _context.Valdetails.Where(d => d.ValId == created.ValId).OrderBy(d => d.GroupId).ThenBy(d => d.DisplayOrder).ToListAsync();
+        details.Should().HaveCount(4);
+
+        // Group 1: Items A and C, should have DisplayOrder 1 and 2
+        var group1 = details.Where(d => d.GroupId == 1).OrderBy(d => d.DisplayOrder).ToList();
+        group1.Should().HaveCount(2);
+        group1[0].GroupContent.Should().Be("A");
+        group1[0].DisplayOrder.Should().Be(1);
+        group1[0].Bold.Should().BeTrue();
+        group1[1].GroupContent.Should().Be("C");
+        group1[1].DisplayOrder.Should().Be(2);
+        group1[1].Bullet.Should().BeTrue();
+
+        // Group 2: Items D and F, should have DisplayOrder 1 and 2
+        var group2 = details.Where(d => d.GroupId == 2).OrderBy(d => d.DisplayOrder).ToList();
+        group2.Should().HaveCount(2);
+        group2[0].GroupContent.Should().Be("D");
+        group2[0].DisplayOrder.Should().Be(1);
+        group2[1].GroupContent.Should().Be("F");
+        group2[1].DisplayOrder.Should().Be(2);
+    }
 }

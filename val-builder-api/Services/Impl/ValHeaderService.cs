@@ -31,6 +31,44 @@ public class ValHeaderService : IValHeaderService
     {
         _context.Valheaders.Add(valHeader);
         await _context.SaveChangesAsync();
+
+        // Add Valdetails for each ValtemplateItem with DefaultOnVal == true
+        var templateItems = await _context.ValtemplateItems
+            .Where(ti => ti.DefaultOnVal == true)
+            .OrderBy(ti => ti.GroupId)
+            .ThenBy(ti => ti.DisplayOrder)
+            .ToListAsync();
+
+        // Group by GroupId and assign sequential DisplayOrder within each group
+        var details = new List<Valdetail>();
+        foreach (var group in templateItems.GroupBy(ti => ti.GroupId))
+        {
+            int order = 1;
+            foreach (var ti in group)
+            {
+                details.Add(new Valdetail
+                {
+                    ValDetailsId = Guid.NewGuid(),
+                    ValId = valHeader.ValId,
+                    GroupId = ti.GroupId,
+                    GroupContent = ti.ItemText,
+                    DisplayOrder = order++,
+                    Bullet = ti.Bullet,
+                    Indent = ti.Indent,
+                    Bold = ti.Bold,
+                    Center = ti.Center,
+                    BlankLineAfter = ti.BlankLineAfter,
+                    TightLineHeight = ti.TightLineHeight
+                });
+            }
+        }
+
+        if (details.Count > 0)
+        {
+            _context.Valdetails.AddRange(details);
+            await _context.SaveChangesAsync();
+        }
+
         return valHeader;
     }
 
