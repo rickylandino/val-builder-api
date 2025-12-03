@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using val_builder_api.Data;
 using val_builder_api.Models;
+using val_builder_api.Helpers;
 
 namespace val_builder_api.Services.Impl;
 
@@ -32,6 +33,18 @@ public class ValHeaderService : IValHeaderService
         _context.Valheaders.Add(valHeader);
         await _context.SaveChangesAsync();
 
+        Company company = await _context.Companies
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.CompanyId == valHeader.PlanId) ?? new Company();
+
+        CompanyPlan companyPlan = await _context.CompanyPlans
+            .AsNoTracking()
+            .FirstOrDefaultAsync(cp => cp.PlanId == valHeader.PlanId) ?? new CompanyPlan();
+
+        List<BracketMapping> bracketMappings = await _context.BracketMappings
+            .AsNoTracking()
+            .ToListAsync();
+
         // Add Valdetails for each ValtemplateItem with DefaultOnVal == true
         var templateItems = await _context.ValtemplateItems
             .Where(ti => ti.DefaultOnVal == true)
@@ -46,12 +59,13 @@ public class ValHeaderService : IValHeaderService
             int order = 1;
             foreach (var ti in group)
             {
+                var replacedContent = await BracketUtil.ReplaceBracketTagsAsync(bracketMappings, ti.ItemText ?? string.Empty, valHeader, company, companyPlan);
                 details.Add(new Valdetail
                 {
                     ValDetailsId = Guid.NewGuid(),
                     ValId = valHeader.ValId,
                     GroupId = ti.GroupId,
-                    GroupContent = ti.ItemText,
+                    GroupContent = replacedContent,
                     DisplayOrder = order++,
                     Bullet = ti.Bullet,
                     Indent = ti.Indent,

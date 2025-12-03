@@ -1,10 +1,11 @@
-using System.Text;
-using System.Web;
+using iText.Kernel.Pdf;
+using iText.Kernel.Utils;
 using Microsoft.EntityFrameworkCore;
 using PuppeteerSharp;
 using PuppeteerSharp.Media;
-using iText.Kernel.Pdf;
-using iText.Kernel.Utils;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Web;
 using val_builder_api.Data;
 using val_builder_api.Models;
 
@@ -315,7 +316,8 @@ public class ValPdfService : IValPdfService
                 var innerText = content.Substring(pTagEnd + 1, pTagClose - pTagEnd - 1);
 
                 // Strip chevrons from inner text
-                innerText = System.Text.RegularExpressions.Regex.Replace(innerText, @"(&lt;&lt;|\<\<)\s*(.*?)\s*(\>\>|&gt;&gt;)", "$2");
+                innerText = Regex.Replace(innerText, @"(&lt;&lt;|\<\<)\s*(.*?)\s*(\>\>|&gt;&gt;)", "$2");
+                innerText = Regex.Replace(innerText, @"\[\[.*?:\s*(.*?)\]\]", "$1");
 
                 // Rebuild the <p> tag with classes
                 if (openTag.Contains("class="))
@@ -332,7 +334,8 @@ public class ValPdfService : IValPdfService
         else
         {
             // Strip chevrons from plain text or other HTML
-            content = System.Text.RegularExpressions.Regex.Replace(content, @"(&lt;&lt;|\<\<)\s*(.*?)\s*(\>\>|&gt;&gt;)", "$2");
+            content = Regex.Replace(content, @"(&lt;&lt;|\<\<)\s*(.*?)\s*(\>\>|&gt;&gt;)", "$2");
+            content = Regex.Replace(content, @"\[\[.*?:\s*(.*?)\]\]", "$1");
             content = $"<p class='{classAttr}'>{content}</p>";
         }
 
