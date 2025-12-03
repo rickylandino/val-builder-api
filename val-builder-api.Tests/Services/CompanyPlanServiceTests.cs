@@ -48,7 +48,7 @@ public class CompanyPlanServiceTests : IDisposable
     {
         var plan = new CompanyPlan { CompanyId = 1, PlanType = "401k", PlanName = "Test" };
         await _service.CreateCompanyPlanAsync(plan);
-        var found = await _service.GetCompanyPlanByIdAsync(plan.PlanId);
+        var found = await _service.GetCompanyPlanByIdAsync(plan.PlanId.Value);
         found.Should().NotBeNull();
         found!.PlanName.Should().Be("Test");
     }
@@ -59,7 +59,7 @@ public class CompanyPlanServiceTests : IDisposable
         var plan = new CompanyPlan { CompanyId = 1, PlanType = "401k", PlanName = "Original" };
         await _service.CreateCompanyPlanAsync(plan);
         plan.PlanName = "Updated";
-        var updated = await _service.UpdateCompanyPlanAsync(plan.PlanId, plan);
+        var updated = await _service.UpdateCompanyPlanAsync(plan.PlanId.Value, plan);
         updated.Should().NotBeNull();
         updated!.PlanName.Should().Be("Updated");
     }
